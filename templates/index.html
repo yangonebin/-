@@ -144,6 +144,72 @@
             background: #45a049;
         }
 
+        .btn-edit {
+            background: #FF9800;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        .btn-edit:hover {
+            background: #F57C00;
+        }
+
+        .btn-delete {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .btn-delete:hover {
+            background: #d32f2f;
+        }
+
+        .cover-letter-item {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+
+        .cover-letter-item h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .cover-letter-item .meta {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .cover-letter-item .question {
+            background: #f5f5f5;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 3px solid #2196F3;
+        }
+
+        .cover-letter-item textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
         .info-box {
             background: #f9f9f9;
             border: 1px solid #ddd;
@@ -252,6 +318,7 @@
             <button class="tab-btn" onclick="showTab('activities')">활동</button>
             <button class="tab-btn" onclick="showTab('projects')">프로젝트</button>
             <button class="tab-btn" onclick="showTab('career')">경력</button>
+            <button class="tab-btn" onclick="showTab('cover-letters')">자소서 문항</button>
         </div>
 
         <!-- 성적 데이터 탭 -->
@@ -324,10 +391,11 @@
                         <th>수상명</th>
                         <th>수여기관</th>
                         <th>수상일자</th>
+                        <th>관리</th>
                     </tr>
                 </thead>
                 <tbody id="awards-tbody">
-                    <tr><td colspan="4" class="loading">데이터 로딩 중...</td></tr>
+                    <tr><td colspan="5" class="loading">데이터 로딩 중...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -348,10 +416,11 @@
                         <th>시작일</th>
                         <th>종료일</th>
                         <th>내용</th>
+                        <th>관리</th>
                     </tr>
                 </thead>
                 <tbody id="activities-tbody">
-                    <tr><td colspan="6" class="loading">데이터 로딩 중...</td></tr>
+                    <tr><td colspan="7" class="loading">데이터 로딩 중...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -373,10 +442,11 @@
                         <th>역할</th>
                         <th>기술스택</th>
                         <th>설명</th>
+                        <th>관리</th>
                     </tr>
                 </thead>
                 <tbody id="projects-tbody">
-                    <tr><td colspan="7" class="loading">데이터 로딩 중...</td></tr>
+                    <tr><td colspan="8" class="loading">데이터 로딩 중...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -397,12 +467,22 @@
                         <th>입사일</th>
                         <th>퇴사일</th>
                         <th>담당업무</th>
+                        <th>관리</th>
                     </tr>
                 </thead>
                 <tbody id="career-tbody">
-                    <tr><td colspan="6" class="loading">데이터 로딩 중...</td></tr>
+                    <tr><td colspan="7" class="loading">데이터 로딩 중...</td></tr>
                 </tbody>
             </table>
+        </div>
+
+        <!-- 자소서 문항 탭 -->
+        <div id="cover-letters" class="tab-content">
+            <div class="section-title">자기소개서 문항 관리</div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="addCoverLetter()">➕ 문항 추가</button>
+            </div>
+            <div id="cover-letter-list"></div>
         </div>
     </div>
 
@@ -714,34 +794,65 @@
             fetch('/api/certifications')
                 .then(r => r.json())
                 .then(data => {
-                    const certDetails = {
-                        "빅데이터분석기사": { grade: "-", number: "BAE-011004931" },
-                        "정보처리기사": { grade: "-", number: "25202210599D" },
-                        "사회조사분석사 2급": { grade: "2급", number: "25201212511E" },
-                        "SQLD": { grade: "-", number: "SQLD-055019327" },
-                        "ADsP": { grade: "-", number: "ADsP-042018438" },
-                        "CAD 2급": { grade: "2급", number: "CATCA22410723417" },
-                        "컴활 1급": { grade: "1급", number: "24-K9-019043" },
-                        "GTQi 일러스트 1급": { grade: "1급", number: "GAL01241020581" },
-                        "GTQ 포토샵 1급": { grade: "1급", number: "GA10124101052189" }
-                    };
-
                     let html = '';
                     data.forEach((cert, idx) => {
-                        const details = certDetails[cert.name] || { grade: "-", number: "-" };
                         html += `
                             <tr>
                                 <td>${idx + 1}</td>
                                 <td>${cert.name}</td>
-                                <td>${details.grade}</td>
+                                <td>${cert.grade || '-'}</td>
                                 <td>${cert.issuer}</td>
                                 <td>${cert.date}</td>
-                                <td>${details.number}</td>
+                                <td>${cert.number || '-'}</td>
+                                <td>
+                                    <button class="btn-edit" onclick="editCert(${cert.id}, '${cert.name}', '${cert.grade || ''}', '${cert.issuer}', '${cert.date}', '${cert.number || ''}')">수정</button>
+                                    <button class="btn-delete" onclick="deleteCert(${cert.id})">삭제</button>
+                                </td>
                             </tr>
                         `;
                     });
                     document.getElementById('cert-tbody').innerHTML = html;
                 });
+        }
+
+        // 자격증 수정
+        function editCert(id, name, grade, issuer, date, number) {
+            const newName = prompt('자격증명:', name);
+            const newGrade = prompt('등급:', grade);
+            const newIssuer = prompt('발행처:', issuer);
+            const newDate = prompt('취득일 (YYYY-MM-DD):', date);
+            const newNumber = prompt('자격증번호:', number);
+
+            if (newName && newIssuer && newDate) {
+                fetch(`/api/certifications/${id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        name: newName,
+                        grade: newGrade || '-',
+                        issuer: newIssuer,
+                        date: newDate,
+                        number: newNumber || ''
+                    })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    alert('수정되었습니다!');
+                    loadCertifications();
+                });
+            }
+        }
+
+        // 자격증 삭제
+        function deleteCert(id) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                fetch(`/api/certifications/${id}`, {method: 'DELETE'})
+                .then(r => r.json())
+                .then(data => {
+                    alert('삭제되었습니다!');
+                    loadCertifications();
+                });
+            }
         }
 
         // 수상 로드
@@ -757,11 +868,26 @@
                                 <td>${award.name}</td>
                                 <td>${award.organization}</td>
                                 <td>${award.date}</td>
+                                <td>
+                                    <button class="btn-delete" onclick="deleteAward(${award.id})">삭제</button>
+                                </td>
                             </tr>
                         `;
                     });
                     document.getElementById('awards-tbody').innerHTML = html;
                 });
+        }
+
+        // 수상 삭제
+        function deleteAward(id) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                fetch(`/api/awards/${id}`, {method: 'DELETE'})
+                .then(r => r.json())
+                .then(data => {
+                    alert('삭제되었습니다!');
+                    loadAwards();
+                });
+            }
         }
 
         // 활동 로드
@@ -778,12 +904,27 @@
                                 <td>${act.organization}</td>
                                 <td>${act.start_date}</td>
                                 <td>${act.end_date}</td>
-                                <td>${act.description}</td>
+                                <td>${act.description || '-'}</td>
+                                <td>
+                                    <button class="btn-delete" onclick="deleteActivity(${act.id})">삭제</button>
+                                </td>
                             </tr>
                         `;
                     });
                     document.getElementById('activities-tbody').innerHTML = html;
                 });
+        }
+
+        // 활동 삭제
+        function deleteActivity(id) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                fetch(`/api/activities/${id}`, {method: 'DELETE'})
+                .then(r => r.json())
+                .then(data => {
+                    alert('삭제되었습니다!');
+                    loadActivities();
+                });
+            }
         }
 
         // 프로젝트 로드
@@ -798,15 +939,30 @@
                                 <td>${idx + 1}</td>
                                 <td>${proj.name}</td>
                                 <td>${proj.date}</td>
-                                <td>${proj.team_size}</td>
+                                <td>${proj.team_size || '-'}</td>
                                 <td>${proj.role || '-'}</td>
-                                <td>${proj.tech_stack.join(', ')}</td>
-                                <td>${proj.description}</td>
+                                <td>${Array.isArray(proj.tech_stack) ? proj.tech_stack.join(', ') : '-'}</td>
+                                <td>${proj.description || '-'}</td>
+                                <td>
+                                    <button class="btn-delete" onclick="deleteProject(${proj.id})">삭제</button>
+                                </td>
                             </tr>
                         `;
                     });
                     document.getElementById('projects-tbody').innerHTML = html;
                 });
+        }
+
+        // 프로젝트 삭제
+        function deleteProject(id) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                fetch(`/api/projects/${id}`, {method: 'DELETE'})
+                .then(r => r.json())
+                .then(data => {
+                    alert('삭제되었습니다!');
+                    loadProjects();
+                });
+            }
         }
 
         // 경력 로드
@@ -823,12 +979,87 @@
                                 <td>${career.position}</td>
                                 <td>${career.start_date}</td>
                                 <td>${career.end_date}</td>
-                                <td>${career.description}</td>
+                                <td>${career.description || '-'}</td>
+                                <td>
+                                    <button class="btn-delete" onclick="deleteCareer(${career.id})">삭제</button>
+                                </td>
                             </tr>
                         `;
                     });
                     document.getElementById('career-tbody').innerHTML = html;
                 });
+        }
+
+        // 경력 삭제
+        function deleteCareer(id) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                fetch(`/api/career/${id}`, {method: 'DELETE'})
+                .then(r => r.json())
+                .then(data => {
+                    alert('삭제되었습니다!');
+                    loadCareer();
+                });
+            }
+        }
+
+        // 자소서 문항 관리
+        let coverLetters = JSON.parse(localStorage.getItem('coverLetters') || '[]');
+
+        function loadCoverLetters() {
+            const list = document.getElementById('cover-letter-list');
+            if (coverLetters.length === 0) {
+                list.innerHTML = '<p style="text-align:center;color:#999;padding:40px;">등록된 자소서 문항이 없습니다.</p>';
+                return;
+            }
+
+            let html = '';
+            coverLetters.forEach((item, idx) => {
+                html += `
+                    <div class="cover-letter-item">
+                        <h3>${item.company} - ${item.position}</h3>
+                        <div class="meta">작성일: ${item.date}</div>
+                        <div class="question"><strong>문항:</strong> ${item.question}</div>
+                        <textarea id="answer-${idx}" onblur="saveCoverLetter(${idx})">${item.answer || ''}</textarea>
+                        <div style="margin-top:10px;">
+                            <button class="btn-delete" onclick="deleteCoverLetter(${idx})">삭제</button>
+                        </div>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        }
+
+        function addCoverLetter() {
+            const company = prompt('회사명:');
+            const position = prompt('직무:');
+            const question = prompt('자소서 문항:');
+
+            if (company && position && question) {
+                coverLetters.push({
+                    company,
+                    position,
+                    question,
+                    answer: '',
+                    date: new Date().toISOString().split('T')[0]
+                });
+                localStorage.setItem('coverLetters', JSON.stringify(coverLetters));
+                loadCoverLetters();
+            }
+        }
+
+        function saveCoverLetter(idx) {
+            const answer = document.getElementById(`answer-${idx}`).value;
+            coverLetters[idx].answer = answer;
+            localStorage.setItem('coverLetters', JSON.stringify(coverLetters));
+            alert('저장되었습니다!');
+        }
+
+        function deleteCoverLetter(idx) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                coverLetters.splice(idx, 1);
+                localStorage.setItem('coverLetters', JSON.stringify(coverLetters));
+                loadCoverLetters();
+            }
         }
 
         // 표 복사
@@ -874,6 +1105,7 @@
         // 페이지 로드 시 성적 데이터 표시
         window.onload = function() {
             loadGrades();
+            loadCoverLetters();
         };
     </script>
 </body>
