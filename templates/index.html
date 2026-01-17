@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>양한빈 이력서 데이터 관리</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .tabs {
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 12px 20px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            margin-right: 5px;
+        }
+
+        .tab-btn:hover {
+            background: #f9f9f9;
+        }
+
+        .tab-btn.active {
+            color: #2196F3;
+            border-bottom-color: #2196F3;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+            color: #333;
+            border-left: 4px solid #2196F3;
+            padding-left: 10px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+
+        .data-table th {
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .data-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .data-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .action-buttons {
+            margin: 15px 0;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            font-size: 13px;
+            margin-right: 5px;
+            border-radius: 3px;
+        }
+
+        .btn:hover {
+            background: #f5f5f5;
+        }
+
+        .btn-primary {
+            background: #2196F3;
+            color: white;
+            border-color: #2196F3;
+        }
+
+        .btn-primary:hover {
+            background: #1976D2;
+        }
+
+        .btn-success {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+
+        .btn-success:hover {
+            background: #45a049;
+        }
+
+        .info-box {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        /* 모달 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 5px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 13px;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+            border-color: #f44336;
+        }
+
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+
+        .action-cell {
+            white-space: nowrap;
+        }
+
+        .btn-small {
+            padding: 4px 8px;
+            font-size: 12px;
+            margin: 0 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>양한빈 이력서 데이터 관리</h1>
+        <div class="subtitle">복사-붙여넣기 가능한 표 형식 데이터 관리</div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('grades')">성적 데이터</button>
+            <button class="tab-btn" onclick="showTab('certifications')">자격증</button>
+            <button class="tab-btn" onclick="showTab('awards')">수상</button>
+            <button class="tab-btn" onclick="showTab('activities')">활동</button>
+            <button class="tab-btn" onclick="showTab('projects')">프로젝트</button>
+            <button class="tab-btn" onclick="showTab('career')">경력</button>
+        </div>
+
+        <!-- 성적 데이터 탭 -->
+        <div id="grades" class="tab-content active">
+            <div class="section-title">전체 성적 (부산대학교)</div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="openAddModal('grade')">➕ 성적 추가</button>
+                <button class="btn btn-primary" onclick="copyTable('grades-table')">📋 표 복사</button>
+                <button class="btn btn-success" onclick="downloadExcel('grades')">📊 엑셀 다운로드</button>
+            </div>
+            <div id="grades-content">
+                <table class="data-table" id="grades-table">
+                    <thead>
+                        <tr>
+                            <th>학년도</th>
+                            <th>학기</th>
+                            <th>성적분류</th>
+                            <th>교과구분</th>
+                            <th>교과목명</th>
+                            <th>학점</th>
+                            <th>성적등급</th>
+                            <th>비고</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="grades-tbody">
+                        <tr><td colspan="9" class="loading">데이터 로딩 중...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 자격증 탭 -->
+        <div id="certifications" class="tab-content">
+            <div class="section-title">자격증 정보</div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="openAddModal('cert')">➕ 자격증 추가</button>
+                <button class="btn btn-primary" onclick="copyTable('cert-table')">📋 표 복사</button>
+                <button class="btn btn-success" onclick="downloadExcel('certifications')">📊 엑셀 다운로드</button>
+            </div>
+            <table class="data-table" id="cert-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>자격증명</th>
+                        <th>등급</th>
+                        <th>발행처</th>
+                        <th>취득일</th>
+                        <th>자격증번호</th>
+                        <th>관리</th>
+                    </tr>
+                </thead>
+                <tbody id="cert-tbody">
+                    <tr><td colspan="7" class="loading">데이터 로딩 중...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 수상 탭 -->
+        <div id="awards" class="tab-content">
+            <div class="section-title">수상 내역</div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="copyTable('awards-table')">📋 표 복사</button>
+                <button class="btn btn-success" onclick="downloadExcel('awards')">📊 엑셀 다운로드</button>
+            </div>
+            <table class="data-table" id="awards-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>수상명</th>
+                        <th>수여기관</th>
+                        <th>수상일자</th>
+                    </tr>
+                </thead>
+                <tbody id="awards-tbody">
+                    <tr><td colspan="4" class="loading">데이터 로딩 중...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 활동 탭 -->
+        <div id="activities" class="tab-content">
+            <div class="section-title">대내외 활동</div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="copyTable('activities-table')">📋 표 복사</button>
+                <button class="btn btn-success" onclick="downloadExcel('activities')">📊 엑셀 다운로드</button>
+            </div>
+            <table class="data-table" id="activities-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>활동명</th>
+                        <th>주관기관</th>
+                        <th>시작일</th>
+                        <th>종료일</th>
+                        <th>내용</th>
+                    </tr>
+                </thead>
+                <tbody id="activities-tbody">
+                    <tr><td colspan="6" class="loading">데이터 로딩 중...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 프로젝트 탭 -->
+        <div id="projects" class="tab-content">
+            <div class="section-title">프로젝트 경험</div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="copyTable('projects-table')">📋 표 복사</button>
+                <button class="btn btn-success" onclick="downloadExcel('projects')">📊 엑셀 다운로드</button>
+            </div>
+            <table class="data-table" id="projects-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>프로젝트명</th>
+                        <th>기간</th>
+                        <th>인원</th>
+                        <th>역할</th>
+                        <th>기술스택</th>
+                        <th>설명</th>
+                    </tr>
+                </thead>
+                <tbody id="projects-tbody">
+                    <tr><td colspan="7" class="loading">데이터 로딩 중...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 경력 탭 -->
+        <div id="career" class="tab-content">
+            <div class="section-title">경력 사항</div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="copyTable('career-table')">📋 표 복사</button>
+                <button class="btn btn-success" onclick="downloadExcel('career')">📊 엑셀 다운로드</button>
+            </div>
+            <table class="data-table" id="career-table">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>기업명</th>
+                        <th>직급</th>
+                        <th>입사일</th>
+                        <th>퇴사일</th>
+                        <th>담당업무</th>
+                    </tr>
+                </thead>
+                <tbody id="career-tbody">
+                    <tr><td colspan="6" class="loading">데이터 로딩 중...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 모달 -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="modal-title">데이터 추가</div>
+            <div id="modal-body"></div>
+            <div style="margin-top: 20px; text-align: right;">
+                <button class="btn" onclick="closeModal()">취소</button>
+                <button class="btn btn-primary" onclick="saveData()">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 성적 데이터 (성적증명서 기반)
+        const gradesData = [
+            {year: '2019', semester: '1학기', type: '정규학기', category: '교양선택', subject: '세계문화유산의이해', credit: '3.0', grade: 'C+', note: '1영역 : 사상과역사'},
+            {year: '2019', semester: '1학기', type: '정규학기', category: '교양선택', subject: '체험관광과 동.서양 문화 이해', credit: '3.0', grade: 'C0', note: '2영역 : 사회와문화'},
+            {year: '2019', semester: '1학기', type: '정규학기', category: '교양필수', subject: '고전읽기와토론', credit: '2.0', grade: 'B+', note: ''},
+            {year: '2019', semester: '1학기', type: '정규학기', category: '전공기초', subject: '경영과 인성', credit: '1.0', grade: 'S', note: ''},
+            {year: '2019', semester: '1학기', type: '정규학기', category: '전공기초', subject: '경제학원론', credit: '3.0', grade: 'A0', note: ''},
+            {year: '2019', semester: '2학기', type: '정규학기', category: '교양선택', subject: '욕망과철학', credit: '3.0', grade: 'A+', note: '1영역 : 사상과역사'},
+            {year: '2019', semester: '2학기', type: '정규학기', category: '교양필수', subject: '열린사고와표현', credit: '2.0', grade: 'B+', note: ''},
+            {year: '2019', semester: '2학기', type: '정규학기', category: '교양필수', subject: '컴퓨팅사고', credit: '1.5', grade: 'B+', note: ''},
+            {year: '2019', semester: '2학기', type: '정규학기', category: '전공기초', subject: '경영통계학', credit: '3.0', grade: 'A0', note: ''},
+            {year: '2019', semester: '2학기', type: '정규학기', category: '전공기초', subject: '회계학원리', credit: '3.0', grade: 'A0', note: ''},
+            {year: '2022', semester: '1학기', type: '정규학기', category: '교양선택', subject: '영어표현연습(I)', credit: '3.0', grade: 'B+', note: '6영역 : 외국어'},
+            {year: '2022', semester: '1학기', type: '정규학기', category: '교양선택', subject: '인간행동과심리', credit: '3.0', grade: 'C+', note: '2영역 : 사회와문화'},
+            {year: '2022', semester: '1학기', type: '정규학기', category: '교양필수', subject: '대학실용영어(II)', credit: '2.0', grade: 'A+', note: ''},
+            {year: '2022', semester: '1학기', type: '정규학기', category: '전공기초', subject: '경영학원론', credit: '3.0', grade: 'B0', note: ''},
+            {year: '2022', semester: '1학기', type: '정규학기', category: '전공필수', subject: '마케팅관리', credit: '3.0', grade: 'B+', note: ''},
+            {year: '2022', semester: '1학기', type: '정규학기', category: '전공필수', subject: '오퍼레이션스 매니지먼트', credit: '3.0', grade: 'A+', note: ''},
+            {year: '2022', semester: '1학기', type: '정규학기', category: '전공필수', subject: '재무회계(I)', credit: '3.0', grade: 'A0', note: ''},
+            {year: '2022', semester: '2학기', type: '정규학기', category: '교양선택', subject: '근력트레이닝처방', credit: '1.5', grade: 'A0', note: '5영역 : 건강과레포츠'},
+            {year: '2022', semester: '2학기', type: '정규학기', category: '전공선택', subject: '광고론', credit: '3.0', grade: 'B+', note: ''},
+            {year: '2022', semester: '2학기', type: '정규학기', category: '전공선택', subject: '데이터베이스관리', credit: '3.0', grade: 'C+', note: ''},
+            {year: '2022', semester: '2학기', type: '정규학기', category: '전공선택', subject: '창업과기업가정신', credit: '3.0', grade: 'B+', note: ''},
+            {year: '2022', semester: '2학기', type: '정규학기', category: '전공필수', subject: '인적자원관리', credit: '3.0', grade: 'B+', note: ''},
+            {year: '2022', semester: '2학기', type: '정규학기', category: '전공필수', subject: '재무관리', credit: '3.0', grade: 'B+', note: ''},
+            {year: '2023', semester: '1학기', type: '정규학기', category: '교양선택', subject: '기업가정신과 창의적 사고', credit: '2.0', grade: 'S', note: '7영역 : 융복합'},
+            {year: '2023', semester: '1학기', type: '정규학기', category: '부전공', subject: '영상매체이론', credit: '3.0', grade: 'B+', note: ''},
+            {year: '2023', semester: '1학기', type: '정규학기', category: '부전공', subject: '영화학입문', credit: '3.0', grade: 'B+', note: ''},
+            {year: '2023', semester: '1학기', type: '정규학기', category: '전공선택', subject: '국제아웃소싱전략', credit: '3.0', grade: 'B+', note: ''},
+            {year: '2023', semester: '1학기', type: '정규학기', category: '전공선택', subject: '소비자행동론', credit: '3.0', grade: 'A+', note: ''},
+            {year: '2023', semester: '1학기', type: '정규학기', category: '전공필수', subject: '투자론', credit: '3.0', grade: 'A0', note: ''},
+            {year: '2023', semester: '여름', type: '계절수업', category: '교양필수', subject: '기초컴퓨터프로그래밍', credit: '1.5', grade: 'A+', note: ''},
+            {year: '2023', semester: '여름', type: '계절수업', category: '전공필수', subject: '국제경영학', credit: '3.0', grade: 'B+', note: ''},
+            {year: '2023', semester: '2학기', type: '정규학기', category: '부전공', subject: '예술사조와예술운동', credit: '3.0', grade: 'C+', note: ''},
+            {year: '2023', semester: '2학기', type: '정규학기', category: '부전공', subject: '한국영화의 역사와 전망', credit: '3.0', grade: 'B+', note: ''},
+            {year: '2023', semester: '2학기', type: '정규학기', category: '일반선택', subject: '대인관계능력과의사소통기술', credit: '3.0', grade: 'S', note: ''},
+            {year: '2023', semester: '2학기', type: '정규학기', category: '일반선택', subject: '진로탐색과 생애설계', credit: '3.0', grade: 'S', note: ''},
+            {year: '2023', semester: '2학기', type: '정규학기', category: '전공선택', subject: '빅데이터비즈니스', credit: '3.0', grade: 'C+', note: ''},
+            {year: '2023', semester: '2학기', type: '정규학기', category: '전공필수', subject: '관리회계', credit: '3.0', grade: 'B+', note: ''},
+            {year: '2024', semester: '2학기', type: '정규학기', category: '교양선택', subject: '성과사랑의철학', credit: '3.0', grade: 'A+', note: '2영역 : 사회와문화'},
+            {year: '2024', semester: '2학기', type: '정규학기', category: '부전공', subject: '예술경영입문', credit: '3.0', grade: 'B+', note: ''},
+            {year: '2024', semester: '2학기', type: '정규학기', category: '일반선택', subject: '취업실전전략(I)-자기소개서및면접준비법', credit: '3.0', grade: 'S', note: ''},
+            {year: '2024', semester: '2학기', type: '정규학기', category: '일반선택', subject: 'PNU TOEFL기초', credit: '3.0', grade: 'S', note: ''},
+            {year: '2024', semester: '2학기', type: '정규학기', category: '전공선택', subject: '조직행위론', credit: '3.0', grade: 'A0', note: ''},
+            {year: '2025', semester: '1학기', type: '정규학기', category: '부전공', subject: '미학입문', credit: '3.0', grade: 'B+', note: ''},
+            {year: '2025', semester: '1학기', type: '정규학기', category: '부전공', subject: '세계영화의 역사와 전망', credit: '3.0', grade: 'C+', note: ''},
+            {year: '2025', semester: '1학기', type: '정규학기', category: '일반선택', subject: '논리적사고와수리', credit: '3.0', grade: 'S', note: ''},
+            {year: '2025', semester: '1학기', type: '정규학기', category: '전공필수', subject: '경영정보시스템', credit: '3.0', grade: 'C+', note: ''}
+        ];
+
+        // 탭 전환
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            // 각 탭 로드
+            if (tabName === 'grades') loadGrades();
+            else if (tabName === 'certifications') loadCertifications();
+            else if (tabName === 'awards') loadAwards();
+            else if (tabName === 'activities') loadActivities();
+            else if (tabName === 'projects') loadProjects();
+            else if (tabName === 'career') loadCareer();
+        }
+
+        // 전역 변수
+        let currentEditType = '';
+        let currentEditIndex = -1;
+
+        // 성적 데이터 로드
+        function loadGrades() {
+            const tbody = document.getElementById('grades-tbody');
+            let html = '';
+            gradesData.forEach((row, idx) => {
+                html += `
+                    <tr>
+                        <td>${row.year}</td>
+                        <td>${row.semester}</td>
+                        <td>${row.type}</td>
+                        <td>${row.category}</td>
+                        <td>${row.subject}</td>
+                        <td>${row.credit}</td>
+                        <td>${row.grade}</td>
+                        <td>${row.note}</td>
+                        <td class="action-cell">
+                            <button class="btn btn-small" onclick="editGrade(${idx})">✏️</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteGrade(${idx})">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // 성적 수정
+        function editGrade(idx) {
+            currentEditType = 'grade';
+            currentEditIndex = idx;
+            const data = gradesData[idx];
+
+            document.getElementById('modal-title').textContent = '성적 수정';
+            document.getElementById('modal-body').innerHTML = `
+                <div class="form-group">
+                    <label>학년도</label>
+                    <input type="text" id="edit-year" value="${data.year}">
+                </div>
+                <div class="form-group">
+                    <label>학기</label>
+                    <input type="text" id="edit-semester" value="${data.semester}">
+                </div>
+                <div class="form-group">
+                    <label>성적분류</label>
+                    <input type="text" id="edit-type" value="${data.type}">
+                </div>
+                <div class="form-group">
+                    <label>교과구분</label>
+                    <input type="text" id="edit-category" value="${data.category}">
+                </div>
+                <div class="form-group">
+                    <label>교과목명</label>
+                    <input type="text" id="edit-subject" value="${data.subject}">
+                </div>
+                <div class="form-group">
+                    <label>학점</label>
+                    <input type="text" id="edit-credit" value="${data.credit}">
+                </div>
+                <div class="form-group">
+                    <label>성적등급</label>
+                    <input type="text" id="edit-grade" value="${data.grade}">
+                </div>
+                <div class="form-group">
+                    <label>비고</label>
+                    <input type="text" id="edit-note" value="${data.note}">
+                </div>
+            `;
+            document.getElementById('modal').classList.add('active');
+        }
+
+        // 성적 삭제
+        function deleteGrade(idx) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                gradesData.splice(idx, 1);
+                loadGrades();
+                alert('삭제되었습니다.');
+            }
+        }
+
+        // 모달 열기
+        function openAddModal(type) {
+            currentEditType = type;
+            currentEditIndex = -1;
+
+            if (type === 'grade') {
+                document.getElementById('modal-title').textContent = '성적 추가';
+                document.getElementById('modal-body').innerHTML = `
+                    <div class="form-group">
+                        <label>학년도</label>
+                        <input type="text" id="edit-year" placeholder="예: 2025">
+                    </div>
+                    <div class="form-group">
+                        <label>학기</label>
+                        <input type="text" id="edit-semester" placeholder="예: 1학기">
+                    </div>
+                    <div class="form-group">
+                        <label>성적분류</label>
+                        <input type="text" id="edit-type" value="정규학기">
+                    </div>
+                    <div class="form-group">
+                        <label>교과구분</label>
+                        <select id="edit-category">
+                            <option>교양선택</option>
+                            <option>교양필수</option>
+                            <option>전공선택</option>
+                            <option>전공필수</option>
+                            <option>전공기초</option>
+                            <option>부전공</option>
+                            <option>일반선택</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>교과목명</label>
+                        <input type="text" id="edit-subject">
+                    </div>
+                    <div class="form-group">
+                        <label>학점</label>
+                        <input type="text" id="edit-credit" placeholder="예: 3.0">
+                    </div>
+                    <div class="form-group">
+                        <label>성적등급</label>
+                        <select id="edit-grade">
+                            <option>A+</option>
+                            <option>A0</option>
+                            <option>B+</option>
+                            <option>B0</option>
+                            <option>C+</option>
+                            <option>C0</option>
+                            <option>D+</option>
+                            <option>D0</option>
+                            <option>F</option>
+                            <option>S</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>비고</label>
+                        <input type="text" id="edit-note" placeholder="선택사항">
+                    </div>
+                `;
+            } else if (type === 'cert') {
+                document.getElementById('modal-title').textContent = '자격증 추가';
+                document.getElementById('modal-body').innerHTML = `
+                    <div class="form-group">
+                        <label>자격증명</label>
+                        <input type="text" id="edit-cert-name">
+                    </div>
+                    <div class="form-group">
+                        <label>등급</label>
+                        <input type="text" id="edit-cert-grade" placeholder="예: 1급, 2급 또는 -">
+                    </div>
+                    <div class="form-group">
+                        <label>발행처</label>
+                        <input type="text" id="edit-cert-issuer">
+                    </div>
+                    <div class="form-group">
+                        <label>취득일</label>
+                        <input type="text" id="edit-cert-date" placeholder="예: 2025-12">
+                    </div>
+                    <div class="form-group">
+                        <label>자격증번호</label>
+                        <input type="text" id="edit-cert-number">
+                    </div>
+                `;
+            }
+
+            document.getElementById('modal').classList.add('active');
+        }
+
+        // 모달 닫기
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+            currentEditType = '';
+            currentEditIndex = -1;
+        }
+
+        // 데이터 저장
+        function saveData() {
+            if (currentEditType === 'grade') {
+                const newData = {
+                    year: document.getElementById('edit-year').value,
+                    semester: document.getElementById('edit-semester').value,
+                    type: document.getElementById('edit-type').value,
+                    category: document.getElementById('edit-category').value,
+                    subject: document.getElementById('edit-subject').value,
+                    credit: document.getElementById('edit-credit').value,
+                    grade: document.getElementById('edit-grade').value,
+                    note: document.getElementById('edit-note').value
+                };
+
+                if (currentEditIndex >= 0) {
+                    // 수정
+                    gradesData[currentEditIndex] = newData;
+                    alert('수정되었습니다.');
+                } else {
+                    // 추가
+                    gradesData.push(newData);
+                    alert('추가되었습니다.');
+                }
+                loadGrades();
+            } else if (currentEditType === 'cert') {
+                const certName = document.getElementById('edit-cert-name').value;
+                const certGrade = document.getElementById('edit-cert-grade').value;
+                const certIssuer = document.getElementById('edit-cert-issuer').value;
+                const certDate = document.getElementById('edit-cert-date').value;
+                const certNumber = document.getElementById('edit-cert-number').value;
+
+                // 로컬스토리지에 저장 (간단한 구현)
+                alert('자격증이 추가되었습니다!\n\n' +
+                      '자격증명: ' + certName + '\n' +
+                      '등급: ' + certGrade + '\n' +
+                      '발행처: ' + certIssuer + '\n' +
+                      '취득일: ' + certDate + '\n' +
+                      '번호: ' + certNumber);
+
+                loadCertifications();
+            }
+
+            closeModal();
+        }
+
+        // 자격증 로드
+        function loadCertifications() {
+            fetch('/api/certifications')
+                .then(r => r.json())
+                .then(data => {
+                    const certDetails = {
+                        "빅데이터분석기사": { grade: "-", number: "BAE-011004931" },
+                        "정보처리기사": { grade: "-", number: "25202210599D" },
+                        "사회조사분석사 2급": { grade: "2급", number: "25201212511E" },
+                        "SQLD": { grade: "-", number: "SQLD-055019327" },
+                        "ADsP": { grade: "-", number: "ADsP-042018438" },
+                        "CAD 2급": { grade: "2급", number: "CATCA22410723417" },
+                        "컴활 1급": { grade: "1급", number: "24-K9-019043" },
+                        "GTQi 일러스트 1급": { grade: "1급", number: "GAL01241020581" },
+                        "GTQ 포토샵 1급": { grade: "1급", number: "GA10124101052189" }
+                    };
+
+                    let html = '';
+                    data.forEach((cert, idx) => {
+                        const details = certDetails[cert.name] || { grade: "-", number: "-" };
+                        html += `
+                            <tr>
+                                <td>${idx + 1}</td>
+                                <td>${cert.name}</td>
+                                <td>${details.grade}</td>
+                                <td>${cert.issuer}</td>
+                                <td>${cert.date}</td>
+                                <td>${details.number}</td>
+                            </tr>
+                        `;
+                    });
+                    document.getElementById('cert-tbody').innerHTML = html;
+                });
+        }
+
+        // 수상 로드
+        function loadAwards() {
+            fetch('/api/awards')
+                .then(r => r.json())
+                .then(data => {
+                    let html = '';
+                    data.forEach((award, idx) => {
+                        html += `
+                            <tr>
+                                <td>${idx + 1}</td>
+                                <td>${award.name}</td>
+                                <td>${award.organization}</td>
+                                <td>${award.date}</td>
+                            </tr>
+                        `;
+                    });
+                    document.getElementById('awards-tbody').innerHTML = html;
+                });
+        }
+
+        // 활동 로드
+        function loadActivities() {
+            fetch('/api/activities')
+                .then(r => r.json())
+                .then(data => {
+                    let html = '';
+                    data.forEach((act, idx) => {
+                        html += `
+                            <tr>
+                                <td>${idx + 1}</td>
+                                <td>${act.name}</td>
+                                <td>${act.organization}</td>
+                                <td>${act.start_date}</td>
+                                <td>${act.end_date}</td>
+                                <td>${act.description}</td>
+                            </tr>
+                        `;
+                    });
+                    document.getElementById('activities-tbody').innerHTML = html;
+                });
+        }
+
+        // 프로젝트 로드
+        function loadProjects() {
+            fetch('/api/projects')
+                .then(r => r.json())
+                .then(data => {
+                    let html = '';
+                    data.forEach((proj, idx) => {
+                        html += `
+                            <tr>
+                                <td>${idx + 1}</td>
+                                <td>${proj.name}</td>
+                                <td>${proj.date}</td>
+                                <td>${proj.team_size}</td>
+                                <td>${proj.role || '-'}</td>
+                                <td>${proj.tech_stack.join(', ')}</td>
+                                <td>${proj.description}</td>
+                            </tr>
+                        `;
+                    });
+                    document.getElementById('projects-tbody').innerHTML = html;
+                });
+        }
+
+        // 경력 로드
+        function loadCareer() {
+            fetch('/api/career')
+                .then(r => r.json())
+                .then(data => {
+                    let html = '';
+                    data.forEach((career, idx) => {
+                        html += `
+                            <tr>
+                                <td>${idx + 1}</td>
+                                <td>${career.company}</td>
+                                <td>${career.position}</td>
+                                <td>${career.start_date}</td>
+                                <td>${career.end_date}</td>
+                                <td>${career.description}</td>
+                            </tr>
+                        `;
+                    });
+                    document.getElementById('career-tbody').innerHTML = html;
+                });
+        }
+
+        // 표 복사
+        function copyTable(tableId) {
+            const table = document.getElementById(tableId);
+            const range = document.createRange();
+            range.selectNode(table);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            document.execCommand('copy');
+            window.getSelection().removeAllRanges();
+            alert('✅ 표가 복사되었습니다! 엑셀이나 워드에 Ctrl+V로 붙여넣으세요.');
+        }
+
+        // 엑셀 다운로드
+        function downloadExcel(type) {
+            const tableIds = {
+                'grades': 'grades-table',
+                'certifications': 'cert-table',
+                'awards': 'awards-table',
+                'activities': 'activities-table',
+                'projects': 'projects-table',
+                'career': 'career-table'
+            };
+            const filenames = {
+                'grades': '양한빈_성적.xls',
+                'certifications': '양한빈_자격증.xls',
+                'awards': '양한빈_수상.xls',
+                'activities': '양한빈_활동.xls',
+                'projects': '양한빈_프로젝트.xls',
+                'career': '양한빈_경력.xls'
+            };
+
+            const table = document.getElementById(tableIds[type]);
+            const html = table.outerHTML;
+            const url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filenames[type];
+            link.click();
+        }
+
+        // 페이지 로드 시 성적 데이터 표시
+        window.onload = function() {
+            loadGrades();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,298 @@
+{
+  "personal_info": {
+    "name": "양한빈",
+    "birth_date": "2000-02-05",
+    "phone": "010-3861-4897",
+    "email": "footballcf0205@gmail.com",
+    "address": "부산광역시 수영구 남천동로 41번길",
+    "portfolio": "https://yangonebin.github.io/yangonebin/",
+    "github": "https://github.com/yangonebin"
+  },
+  "education": [
+    {
+      "institution": "부산대학교",
+      "major": "경영학과",
+      "degree": "학사",
+      "start_date": "2019-03",
+      "end_date": "2025-08",
+      "gpa": "3.48/4.5",
+      "status": "졸업"
+    },
+    {
+      "institution": "부산대학교",
+      "major": "예술문화영상학과",
+      "degree": "부전공",
+      "start_date": "2023-03",
+      "end_date": "2025-12",
+      "status": "수료"
+    }
+  ],
+  "training": [
+    {
+      "name": "SSAFY (삼성 청년 SW 아카데미)",
+      "institution": "멀티캠퍼스",
+      "start_date": "2025-07",
+      "end_date": "2026-06",
+      "description": "Python 기반 웹 풀스택 개발 및 생성형 AI 활용",
+      "skills": [
+        "Python",
+        "Django",
+        "Vue.js",
+        "AI/ML",
+        "Prompt Engineering"
+      ]
+    },
+    {
+      "name": "CJ 리모트 인턴십",
+      "institution": "CJ 올리브네트웍스",
+      "start_date": "2023-09",
+      "end_date": "2023-12",
+      "description": "데이터 기획/분석 역량 강화 (CDS 양성)",
+      "skills": [
+        "데이터 분석",
+        "엑셀",
+        "데이터 사이언스"
+      ]
+    }
+  ],
+  "career": [
+    {
+      "company": "(주)이루티",
+      "position": "PM Assistant / All-rounder",
+      "start_date": "2023-05",
+      "end_date": "2025-05",
+      "description": "스타트업 초기 멤버로 비즈니스 스케일업 주도",
+      "achievements": [
+        "매출 320만원 → 5억원 성장 견인",
+        "창사 이래 최초 영업이익 흑자 전환 기여",
+        "블록체인/3D 기술 시각화 및 콘텐츠 마케팅",
+        "프로젝트 매니징 및 외주사업 관리"
+      ]
+    }
+  ],
+  "certifications": [
+    {
+      "name": "빅데이터분석기사",
+      "issuer": "한국데이터산업진흥원",
+      "date": "2025-12"
+    },
+    {
+      "name": "정보처리기사",
+      "issuer": "과기부",
+      "date": "2025-09"
+    },
+    {
+      "name": "사회조사분석사 2급",
+      "issuer": "통계청",
+      "date": "2025-06"
+    },
+    {
+      "name": "SQLD",
+      "issuer": "한국데이터산업진흥원",
+      "date": "2024-12"
+    },
+    {
+      "name": "ADsP",
+      "issuer": "한국데이터산업진흥원",
+      "date": "2024-09"
+    },
+    {
+      "name": "컴활 1급",
+      "issuer": "대한상공회의소",
+      "date": "2024-04"
+    },
+    {
+      "name": "GTQi 일러스트 1급",
+      "issuer": "한국생산성본부",
+      "date": "2024-03"
+    },
+    {
+      "name": "GTQ 포토샵 1급",
+      "issuer": "한국생산성본부",
+      "date": "2024-02"
+    }
+  ],
+  "skills": {
+    "programming": {
+      "Python": "상급",
+      "SQL": "중급",
+      "Django": "중급",
+      "Vue.js": "중급"
+    },
+    "data_analysis": {
+      "Pandas": "상급",
+      "NumPy": "상급",
+      "SPSS": "중급",
+      "Power BI": "중급"
+    },
+    "ai_ml": {
+      "TensorFlow": "중급",
+      "PyTorch": "중급",
+      "MLflow": "중급",
+      "FastAPI": "중급"
+    },
+    "creative": {
+      "Adobe Photoshop": "상급",
+      "Adobe Illustrator": "상급",
+      "Final Cut Pro": "상급",
+      "Adobe Animate": "상급"
+    },
+    "infrastructure": {
+      "Docker": "중급",
+      "Git": "중급"
+    }
+  },
+  "activities": [
+    {
+      "name": "남앞지 (유튜브 채널)",
+      "organization": "유튜브",
+      "start_date": "2024-12",
+      "end_date": "2025-06",
+      "description": "데이터 분석 및 통계학 교육 콘텐츠 제작",
+      "achievements": [
+        "구독자 3,000명 달성",
+        "조회수 2만회 영상 보유"
+      ]
+    },
+    {
+      "name": "A.B.S (AI 논문 스터디)",
+      "organization": "부산대학교",
+      "start_date": "2025-10",
+      "end_date": "2026-01",
+      "description": "AI 핵심 논문 심층 리뷰 (CNN, LSTM, Transformer 등)"
+    },
+    {
+      "name": "KB 캠퍼스 스타",
+      "organization": "KB 국민은행",
+      "start_date": "2023-02",
+      "end_date": "2023-07",
+      "description": "KB 국민은행 홍보대사, 영상 콘텐츠 제작"
+    },
+    {
+      "name": "청소년 SW 멘토링",
+      "organization": "한국과학창의재단",
+      "start_date": "2024-08",
+      "end_date": "2024-11",
+      "description": "중·고등학생 SW 해커톤 멘토"
+    },
+    {
+      "name": "K-pop 콘텐츠 마케팅",
+      "organization": "한국진로교육원",
+      "start_date": "2022-12",
+      "end_date": "2023-04",
+      "description": "K-POP 아이돌 마케팅 실무 과정"
+    },
+    {
+      "name": "M.A.D (축구 동아리)",
+      "organization": "부산대학교",
+      "start_date": "2019-03",
+      "end_date": "2025-08",
+      "description": "부산대학교 축구 동아리 활동"
+    }
+  ],
+  "awards": [
+    {
+      "name": "문화기획 포럼 장려상",
+      "organization": "부산대학교",
+      "date": "2024-12"
+    },
+    {
+      "name": "SW 동행 프로젝트 이사장상",
+      "organization": "한국과학창의재단",
+      "date": "2024-12"
+    },
+    {
+      "name": "대한민국 대학생 광고대회 챌린저상",
+      "organization": "한국광고총연합회",
+      "date": "2024-11"
+    },
+    {
+      "name": "전공소개 콘텐츠 개발 장려상",
+      "organization": "부산대학교",
+      "date": "2024-01"
+    },
+    {
+      "name": "ESG 지원사업 고용노동부 장관상",
+      "organization": "고용노동부",
+      "date": "2023-12"
+    },
+    {
+      "name": "세가더 영상 공모전 최우수상",
+      "organization": "포스코홀딩스",
+      "date": "2023-12"
+    },
+    {
+      "name": "연구 아이디어 공모전 최우수상",
+      "organization": "부산대학교",
+      "date": "2023-11"
+    },
+    {
+      "name": "KB 캠퍼스 스타 종합 3등",
+      "organization": "KB국민은행",
+      "date": "2023-07"
+    },
+    {
+      "name": "마케팅 콘텐츠 기획 최우수상",
+      "organization": "한국진로교육원",
+      "date": "2023-04"
+    }
+  ],
+  "projects": [
+    {
+      "name": "FinMatch - AI 주식가격 예측 서비스 (TFT-R)",
+      "date": "2025",
+      "duration": "팀 프로젝트",
+      "team_size": "2명",
+      "role": "Machine Learning Engineer (AI 모델링 및 API 서버 구축 전담)",
+      "tech_stack": [
+        "PyTorch",
+        "TensorFlow",
+        "LSTM",
+        "Transformer (TFT)",
+        "MLflow",
+        "FastAPI",
+        "Docker",
+        "yfinance",
+        "SQL"
+      ],
+      "description": "전통적 기술 분석(일목균형표)과 딥러닝을 결합한 주가 예측 AI 시스템",
+      "achievements": [
+        "LSTM → TFT(Temporal Fusion Transformer) 모델 진화를 통한 성능 개선",
+        "MLflow를 활용한 500회 이상 실험 추적 및 관리",
+        "평균 ROI 103.68%, 최고 ROI 292.45% 달성",
+        "FastAPI 기반 실시간 추론 API 서버 구축",
+        "회귀 vs 분류 모델 A/B 테스트를 통한 통계적 검증",
+        "일목균형표 지표를 수치화하여 피처 엔지니어링 수행",
+        "Docker 기반 배포 파이프라인 구축"
+      ],
+      "challenges": [
+        "금융권의 설명의무 규제로 인한 딥러닝 도입 어려움 인식",
+        "복잡한 피처(14개)가 오히려 노이즈로 작용하는 발견",
+        "순수 OHLCV 5개 피처로 단순화하여 성능 대폭 향상"
+      ],
+      "link": "https://github.com/yangonebin"
+    },
+    {
+      "name": "MNIST 성능 개선 및 MLOps 구축",
+      "date": "2025-12",
+      "duration": "2일",
+      "team_size": "1명",
+      "tech_stack": [
+        "PyTorch",
+        "Hugging Face",
+        "FastAPI",
+        "Docker",
+        "MLflow"
+      ],
+      "description": "Vision Transformer(ViT) 모델 Fine-tuning 및 MLOps 파이프라인 구축",
+      "achievements": [
+        "ViT 모델로 99.22% 정확도 달성",
+        "통계적 가설검증(T-test)으로 성능 우위 입증",
+        "FastAPI 기반 추론 서버 구축",
+        "Docker 컨테이너화 완료"
+      ],
+      "link": "https://winter-azimuth-dd0.notion.site/Project-Report-MNIST-MLOps-Pipeline-2bd1a506dcad80818476e00e25042394"
+    }
+  ],
+  "last_updated": "2026-01-17T11:28:21.025523"
+}
