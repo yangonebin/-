@@ -862,6 +862,8 @@
                 .then(data => {
                     let html = '';
                     data.forEach((award, idx) => {
+                        const name = award.name.replace(/'/g, "\\'");
+                        const org = award.organization.replace(/'/g, "\\'");
                         html += `
                             <tr>
                                 <td>${idx + 1}</td>
@@ -869,6 +871,7 @@
                                 <td>${award.organization}</td>
                                 <td>${award.date}</td>
                                 <td>
+                                    <button class="btn-edit" onclick="editAward(${award.id}, '${name}', '${org}', '${award.date}')">수정</button>
                                     <button class="btn-delete" onclick="deleteAward(${award.id})">삭제</button>
                                 </td>
                             </tr>
@@ -876,6 +879,26 @@
                     });
                     document.getElementById('awards-tbody').innerHTML = html;
                 });
+        }
+
+        // 수상 수정
+        function editAward(id, name, org, date) {
+            const newName = prompt('수상명:', name);
+            const newOrg = prompt('수여기관:', org);
+            const newDate = prompt('수상일자 (YYYY-MM):', date);
+
+            if (newName && newOrg && newDate) {
+                fetch(`/api/awards/${id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name: newName, organization: newOrg, date: newDate})
+                })
+                .then(r => r.json())
+                .then(data => {
+                    alert('수정되었습니다!');
+                    loadAwards();
+                });
+            }
         }
 
         // 수상 삭제
@@ -897,6 +920,9 @@
                 .then(data => {
                     let html = '';
                     data.forEach((act, idx) => {
+                        const name = (act.name || '').replace(/'/g, "\\'");
+                        const org = (act.organization || '').replace(/'/g, "\\'");
+                        const desc = (act.description || '').replace(/'/g, "\\'");
                         html += `
                             <tr>
                                 <td>${idx + 1}</td>
@@ -906,6 +932,7 @@
                                 <td>${act.end_date}</td>
                                 <td>${act.description || '-'}</td>
                                 <td>
+                                    <button class="btn-edit" onclick="editActivity(${act.id}, '${name}', '${org}', '${act.start_date}', '${act.end_date}', '${desc}')">수정</button>
                                     <button class="btn-delete" onclick="deleteActivity(${act.id})">삭제</button>
                                 </td>
                             </tr>
@@ -913,6 +940,28 @@
                     });
                     document.getElementById('activities-tbody').innerHTML = html;
                 });
+        }
+
+        // 활동 수정
+        function editActivity(id, name, org, startDate, endDate, desc) {
+            const newName = prompt('활동명:', name);
+            const newOrg = prompt('주관기관:', org);
+            const newStartDate = prompt('시작일 (YYYY-MM):', startDate);
+            const newEndDate = prompt('종료일 (YYYY-MM):', endDate);
+            const newDesc = prompt('내용:', desc);
+
+            if (newName && newOrg && newStartDate && newEndDate) {
+                fetch(`/api/activities/${id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name: newName, organization: newOrg, start_date: newStartDate, end_date: newEndDate, description: newDesc})
+                })
+                .then(r => r.json())
+                .then(data => {
+                    alert('수정되었습니다!');
+                    loadActivities();
+                });
+            }
         }
 
         // 활동 삭제
@@ -934,6 +983,10 @@
                 .then(data => {
                     let html = '';
                     data.forEach((proj, idx) => {
+                        const name = (proj.name || '').replace(/'/g, "\\'");
+                        const role = (proj.role || '').replace(/'/g, "\\'");
+                        const desc = (proj.description || '').replace(/'/g, "\\'");
+                        const tech = Array.isArray(proj.tech_stack) ? proj.tech_stack.join(', ') : '';
                         html += `
                             <tr>
                                 <td>${idx + 1}</td>
@@ -941,9 +994,10 @@
                                 <td>${proj.date}</td>
                                 <td>${proj.team_size || '-'}</td>
                                 <td>${proj.role || '-'}</td>
-                                <td>${Array.isArray(proj.tech_stack) ? proj.tech_stack.join(', ') : '-'}</td>
+                                <td>${tech || '-'}</td>
                                 <td>${proj.description || '-'}</td>
                                 <td>
+                                    <button class="btn-edit" onclick="editProject(${proj.id}, '${name}', '${proj.date}', '${proj.team_size || ''}', '${role}', '${desc}')">수정</button>
                                     <button class="btn-delete" onclick="deleteProject(${proj.id})">삭제</button>
                                 </td>
                             </tr>
@@ -951,6 +1005,28 @@
                     });
                     document.getElementById('projects-tbody').innerHTML = html;
                 });
+        }
+
+        // 프로젝트 수정
+        function editProject(id, name, date, teamSize, role, desc) {
+            const newName = prompt('프로젝트명:', name);
+            const newDate = prompt('기간:', date);
+            const newTeamSize = prompt('인원:', teamSize);
+            const newRole = prompt('역할:', role);
+            const newDesc = prompt('설명:', desc);
+
+            if (newName && newDate) {
+                fetch(`/api/projects/${id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name: newName, date: newDate, team_size: newTeamSize, role: newRole, description: newDesc, tech_stack: []})
+                })
+                .then(r => r.json())
+                .then(data => {
+                    alert('수정되었습니다!');
+                    loadProjects();
+                });
+            }
         }
 
         // 프로젝트 삭제
@@ -972,6 +1048,9 @@
                 .then(data => {
                     let html = '';
                     data.forEach((career, idx) => {
+                        const company = (career.company || '').replace(/'/g, "\\'");
+                        const position = (career.position || '').replace(/'/g, "\\'");
+                        const desc = (career.description || '').replace(/'/g, "\\'");
                         html += `
                             <tr>
                                 <td>${idx + 1}</td>
@@ -981,6 +1060,7 @@
                                 <td>${career.end_date}</td>
                                 <td>${career.description || '-'}</td>
                                 <td>
+                                    <button class="btn-edit" onclick="editCareer(${career.id}, '${company}', '${position}', '${career.start_date}', '${career.end_date}', '${desc}')">수정</button>
                                     <button class="btn-delete" onclick="deleteCareer(${career.id})">삭제</button>
                                 </td>
                             </tr>
@@ -988,6 +1068,28 @@
                     });
                     document.getElementById('career-tbody').innerHTML = html;
                 });
+        }
+
+        // 경력 수정
+        function editCareer(id, company, position, startDate, endDate, desc) {
+            const newCompany = prompt('기업명:', company);
+            const newPosition = prompt('직급:', position);
+            const newStartDate = prompt('입사일 (YYYY-MM):', startDate);
+            const newEndDate = prompt('퇴사일 (YYYY-MM):', endDate);
+            const newDesc = prompt('담당업무:', desc);
+
+            if (newCompany && newPosition && newStartDate && newEndDate) {
+                fetch(`/api/career/${id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({company: newCompany, position: newPosition, start_date: newStartDate, end_date: newEndDate, description: newDesc})
+                })
+                .then(r => r.json())
+                .then(data => {
+                    alert('수정되었습니다!');
+                    loadCareer();
+                });
+            }
         }
 
         // 경력 삭제
