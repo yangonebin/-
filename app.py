@@ -63,6 +63,14 @@ def get_career():
     return jsonify(career)
 
 
+@app.route('/api/career/<int:career_id>', methods=['PUT'])
+def update_career(career_id):
+    """경력 수정 API"""
+    data = request.get_json()
+    db.update_career(career_id, data)
+    return jsonify({'success': True, 'message': '경력이 수정되었습니다.'})
+
+
 @app.route('/api/career/<int:career_id>', methods=['DELETE'])
 def delete_career(career_id):
     """경력 삭제 API"""
@@ -113,6 +121,14 @@ def get_activities():
     return jsonify(activities)
 
 
+@app.route('/api/activities/<int:activity_id>', methods=['PUT'])
+def update_activity(activity_id):
+    """활동 수정 API"""
+    data = request.get_json()
+    db.update_activity(activity_id, data)
+    return jsonify({'success': True, 'message': '활동이 수정되었습니다.'})
+
+
 @app.route('/api/activities/<int:activity_id>', methods=['DELETE'])
 def delete_activity(activity_id):
     """활동 삭제 API"""
@@ -130,6 +146,14 @@ def get_awards():
     return jsonify(awards)
 
 
+@app.route('/api/awards/<int:award_id>', methods=['PUT'])
+def update_award(award_id):
+    """수상 수정 API"""
+    data = request.get_json()
+    db.update_award(award_id, data)
+    return jsonify({'success': True, 'message': '수상이 수정되었습니다.'})
+
+
 @app.route('/api/awards/<int:award_id>', methods=['DELETE'])
 def delete_award(award_id):
     """수상 삭제 API"""
@@ -142,6 +166,14 @@ def get_projects():
     """프로젝트 정보 API (DB에서 조회)"""
     projects = db.get_all_projects()
     return jsonify(projects)
+
+
+@app.route('/api/projects/<int:project_id>', methods=['PUT'])
+def update_project(project_id):
+    """프로젝트 수정 API"""
+    data = request.get_json()
+    db.update_project(project_id, data)
+    return jsonify({'success': True, 'message': '프로젝트가 수정되었습니다.'})
 
 
 @app.route('/api/projects/<int:project_id>', methods=['DELETE'])

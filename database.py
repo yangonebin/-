@@ -251,6 +251,18 @@ class ResumeDatabase:
             })
         return awards
 
+    def update_award(self, award_id, data):
+        """수상 수정"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE awards
+            SET name=?, organization=?, date=?
+            WHERE id=?
+        ''', (data['name'], data['organization'], data['date'], award_id))
+        conn.commit()
+        conn.close()
+
     def delete_award(self, award_id):
         """수상 삭제"""
         conn = self.get_connection()
@@ -293,6 +305,19 @@ class ResumeDatabase:
                 'description': row[5]
             })
         return activities
+
+    def update_activity(self, activity_id, data):
+        """활동 수정"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE activities
+            SET name=?, organization=?, start_date=?, end_date=?, description=?
+            WHERE id=?
+        ''', (data['name'], data['organization'], data['start_date'],
+              data['end_date'], data.get('description', ''), activity_id))
+        conn.commit()
+        conn.close()
 
     def delete_activity(self, activity_id):
         """활동 삭제"""
@@ -339,6 +364,20 @@ class ResumeDatabase:
             })
         return projects
 
+    def update_project(self, project_id, data):
+        """프로젝트 수정"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        tech_stack = json.dumps(data.get('tech_stack', []))
+        cursor.execute('''
+            UPDATE projects
+            SET name=?, date=?, team_size=?, role=?, tech_stack=?, description=?
+            WHERE id=?
+        ''', (data['name'], data['date'], data.get('team_size', ''),
+              data.get('role', ''), tech_stack, data.get('description', ''), project_id))
+        conn.commit()
+        conn.close()
+
     def delete_project(self, project_id):
         """프로젝트 삭제"""
         conn = self.get_connection()
@@ -381,6 +420,19 @@ class ResumeDatabase:
                 'description': row[5]
             })
         return careers
+
+    def update_career(self, career_id, data):
+        """경력 수정"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE career
+            SET company=?, position=?, start_date=?, end_date=?, description=?
+            WHERE id=?
+        ''', (data['company'], data['position'], data['start_date'],
+              data['end_date'], data.get('description', ''), career_id))
+        conn.commit()
+        conn.close()
 
     def delete_career(self, career_id):
         """경력 삭제"""
