@@ -115,6 +115,22 @@ class ResumeDatabase:
             )
         ''')
 
+        # 자소서 문항 테이블
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS cover_letters (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                company TEXT NOT NULL,
+                position TEXT NOT NULL,
+                category TEXT NOT NULL,
+                question TEXT NOT NULL,
+                answer TEXT,
+                char_limit INTEGER,
+                extra_fields TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+
         # 기존 테이블에 extra_fields 컬럼 추가 (없으면)
         self._add_column_if_not_exists(cursor, 'certifications', 'extra_fields', 'TEXT')
         self._add_column_if_not_exists(cursor, 'awards', 'extra_fields', 'TEXT')
@@ -549,3 +565,96 @@ class ResumeDatabase:
         conn.commit()
         conn.close()
         return row[0] if row else None
+
+    # ==================== 자소서 문항 관리 ====================
+    def add_cover_letter(self, data):
+        """자소서 문항 추가"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO cover_letters (company, position, category, question, answer, char_limit, extra_fields)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (data['company'], data['position'], data['category'], data['question'],
+              data.get('answer', ''), data.get('char_limit'), data.get('extra_fields')))
+        conn.commit()
+        cover_letter_id = cursor.lastrowid
+        conn.close()
+        return cover_letter_id
+
+    def get_all_cover_letters(self):
+        """모든 자소서 문항 조회"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM cover_letters ORDER BY created_at DESC')
+        rows = cursor.fetchall()
+        conn.close()
+
+        cover_letters = []
+        for row in rows:
+            cover_letters.append({
+                'id': row[0],
+                'company': row[1],
+                'position': row[2],
+                'category': row[3],
+                'question': row[4],
+                'answer': row[5],
+                'char_limit': row[6],
+                'extra_fields': row[7],
+                'created_at': row[8],
+                'updated_at': row[9]
+            })
+        return cover_letters
+
+    def get_cover_letters_by_category(self, category):
+        """카테고리별 자소서 문항 조회"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM cover_letters WHERE category=? ORDER BY created_at DESC', (category,))
+        rows = cursor.fetchall()
+        conn.close()
+
+        cover_letters = []
+        for row in rows:
+            cover_letters.append({
+                'id': row[0],
+                'company': row[1],
+                'position': row[2],
+                'category': row[3],
+                'question': row[4],
+                'answer': row[5],
+                'char_limit': row[6],
+                'extra_fields': row[7],
+                'created_at': row[8],
+                'updated_at': row[9]
+            })
+        return cover_letters
+
+    def update_cover_letter(self, cover_letter_id, data):
+        """자소서 문항 수정"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        # answer만 수정하는 경우 (다른 필드가 빈 문자열)
+        if data.get('company') == '' and data.get('position') == '' and 'answer' in data:
+            cursor.execute('''
+                UPDATE cover_letters
+                SET answer=?, updated_at=CURRENT_TIMESTAMP
+                WHERE id=?
+            ''', (data.get('answer', ''), cover_letter_id))
+        else:
+            cursor.execute('''
+                UPDATE cover_letters
+                SET company=?, position=?, category=?, question=?, answer=?, char_limit=?, extra_fields=?, updated_at=CURRENT_TIMESTAMP
+                WHERE id=?
+            ''', (data['company'], data['position'], data['category'], data['question'],
+                  data.get('answer', ''), data.get('char_limit'), data.get('extra_fields'), cover_letter_id))
+        conn.commit()
+        conn.close()
+
+    def delete_cover_letter(self, cover_letter_id):
+        """자소서 문항 삭제"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM cover_letters WHERE id=?', (cover_letter_id,))
+        conn.commit()
+        conn.close()

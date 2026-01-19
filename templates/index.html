@@ -576,7 +576,20 @@
         <div id="cover-letters" class="tab-content">
             <div class="section-title">자기소개서 문항 관리</div>
             <div class="action-buttons">
-                <button class="btn btn-primary" onclick="addCoverLetter()">➕ 문항 추가</button>
+                <button class="btn btn-primary" onclick="openAddCoverLetterModal()">➕ 문항 추가</button>
+                <select id="cover-letter-filter" onchange="filterCoverLetters()" style="padding: 8px; margin-left: 10px;">
+                    <option value="">전체 보기</option>
+                    <option value="지원동기">지원동기</option>
+                    <option value="성장과정">성장과정</option>
+                    <option value="성격/장단점">성격/장단점</option>
+                    <option value="갈등경험">갈등경험</option>
+                    <option value="협업경험">협업경험</option>
+                    <option value="문제해결">문제해결</option>
+                    <option value="실패경험">실패경험</option>
+                    <option value="목표/비전">목표/비전</option>
+                    <option value="직무역량">직무역량</option>
+                    <option value="기타">기타</option>
+                </select>
             </div>
             <div id="cover-letter-list"></div>
         </div>
@@ -661,6 +674,7 @@
             else if (tabName === 'projects') loadProjects();
             else if (tabName === 'career') loadCareer();
             else if (tabName === 'archives') loadArchives();
+            else if (tabName === 'cover-letters') loadCoverLettersFromDB();
         }
 
         // 전역 변수
@@ -1015,6 +1029,45 @@
                 }).then(r => r.json()).then(() => {
                     alert('수정되었습니다!');
                     loadArchives();
+                });
+            } else if (currentEditType === 'cover-letter-add') {
+                // 자소서 문항 추가
+                const extraFields = collectCustomFields();
+                const data = {
+                    company: document.getElementById('edit-cl-company').value,
+                    position: document.getElementById('edit-cl-position').value,
+                    category: document.getElementById('edit-cl-category').value,
+                    question: document.getElementById('edit-cl-question').value,
+                    char_limit: document.getElementById('edit-cl-char-limit').value || null,
+                    answer: ''
+                };
+                if (extraFields) data.extra_fields = extraFields;
+                fetch('/api/cover-letters', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                }).then(r => r.json()).then(() => {
+                    alert('자소서 문항이 추가되었습니다!');
+                    loadCoverLettersFromDB();
+                });
+            } else if (currentEditType === 'cover-letter-edit') {
+                // 자소서 문항 수정
+                const extraFields = collectCustomFields();
+                const data = {
+                    company: document.getElementById('edit-cl-company').value,
+                    position: document.getElementById('edit-cl-position').value,
+                    category: document.getElementById('edit-cl-category').value,
+                    question: document.getElementById('edit-cl-question').value,
+                    char_limit: document.getElementById('edit-cl-char-limit').value || null
+                };
+                if (extraFields) data.extra_fields = extraFields;
+                fetch(`/api/cover-letters/${currentEditId}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                }).then(r => r.json()).then(() => {
+                    alert('수정되었습니다!');
+                    loadCoverLettersFromDB();
                 });
             }
 
@@ -1401,63 +1454,182 @@
             }
         }
 
-        // 자소서 문항 관리
-        let coverLetters = JSON.parse(localStorage.getItem('coverLetters') || '[]');
+        // ==================== 자소서 문항 관리 (DB 기반) ====================
+        function loadCoverLettersFromDB() {
+            const category = document.getElementById('cover-letter-filter').value;
+            const url = category ? `/api/cover-letters?category=${encodeURIComponent(category)}` : '/api/cover-letters';
 
-        function loadCoverLetters() {
-            const list = document.getElementById('cover-letter-list');
-            if (coverLetters.length === 0) {
-                list.innerHTML = '<p style="text-align:center;color:#999;padding:40px;">등록된 자소서 문항이 없습니다.</p>';
-                return;
-            }
+            fetch(url)
+                .then(r => r.json())
+                .then(data => {
+                    const list = document.getElementById('cover-letter-list');
+                    if (data.length === 0) {
+                        list.innerHTML = '<p style="text-align:center;color:#999;padding:40px;">등록된 자소서 문항이 없습니다.</p>';
+                        return;
+                    }
 
-            let html = '';
-            coverLetters.forEach((item, idx) => {
-                html += `
-                    <div class="cover-letter-item">
-                        <h3>${item.company} - ${item.position}</h3>
-                        <div class="meta">작성일: ${item.date}</div>
-                        <div class="question"><strong>문항:</strong> ${item.question}</div>
-                        <textarea id="answer-${idx}" onblur="saveCoverLetter(${idx})">${item.answer || ''}</textarea>
-                        <div style="margin-top:10px;">
-                            <button class="btn-delete" onclick="deleteCoverLetter(${idx})">삭제</button>
-                        </div>
-                    </div>
-                `;
-            });
-            list.innerHTML = html;
-        }
+                    let html = '';
+                    data.forEach((item) => {
+                        const company = (item.company || '').replace(/'/g, "\\'");
+                        const position = (item.position || '').replace(/'/g, "\\'");
+                        const question = (item.question || '').replace(/'/g, "\\'");
+                        const answer = (item.answer || '').replace(/'/g, "\\'");
+                        const extraFields = (item.extra_fields || '{}').replace(/'/g, "\\'");
+                        html += `
+                            <div class="cover-letter-item" style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:20px;margin-bottom:15px;">
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                                    <h3 style="margin:0;color:#333;">${item.company} - ${item.position}</h3>
+                                    <span style="background:#e3f2fd;color:#1976d2;padding:4px 12px;border-radius:20px;font-size:12px;">${item.category}</span>
+                                </div>
+                                <div style="color:#666;font-size:13px;margin-bottom:10px;">
+                                    ${item.char_limit ? `글자수 제한: ${item.char_limit}자 | ` : ''}
+                                    작성일: ${item.created_at ? item.created_at.split(' ')[0] : '-'}
+                                </div>
+                                <div style="background:#f5f5f5;padding:10px;border-radius:4px;margin-bottom:10px;">
+                                    <strong>문항:</strong> ${item.question}
+                                </div>
+                                <textarea id="answer-${item.id}" style="width:100%;min-height:150px;padding:10px;border:1px solid #ddd;border-radius:4px;resize:vertical;"
+                                    onblur="saveCoverLetterAnswer(${item.id})">${item.answer || ''}</textarea>
+                                <div style="margin-top:10px;display:flex;gap:10px;">
+                                    <button class="btn-edit" onclick="editCoverLetter(${item.id}, '${company}', '${position}', '${item.category}', '${question}', ${item.char_limit || 0}, '${extraFields}')">수정</button>
+                                    <button class="btn-delete" onclick="deleteCoverLetterFromDB(${item.id})">삭제</button>
+                                    <span style="margin-left:auto;color:#999;font-size:12px;" id="char-count-${item.id}"></span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    list.innerHTML = html;
 
-        function addCoverLetter() {
-            const company = prompt('회사명:');
-            const position = prompt('직무:');
-            const question = prompt('자소서 문항:');
-
-            if (company && position && question) {
-                coverLetters.push({
-                    company,
-                    position,
-                    question,
-                    answer: '',
-                    date: new Date().toISOString().split('T')[0]
+                    // 글자수 카운트 초기화
+                    data.forEach(item => {
+                        updateCharCount(item.id);
+                        document.getElementById(`answer-${item.id}`).addEventListener('input', () => updateCharCount(item.id));
+                    });
                 });
-                localStorage.setItem('coverLetters', JSON.stringify(coverLetters));
-                loadCoverLetters();
+        }
+
+        function updateCharCount(id) {
+            const textarea = document.getElementById(`answer-${id}`);
+            const countSpan = document.getElementById(`char-count-${id}`);
+            if (textarea && countSpan) {
+                countSpan.textContent = `현재 ${textarea.value.length}자`;
             }
         }
 
-        function saveCoverLetter(idx) {
-            const answer = document.getElementById(`answer-${idx}`).value;
-            coverLetters[idx].answer = answer;
-            localStorage.setItem('coverLetters', JSON.stringify(coverLetters));
-            alert('저장되었습니다!');
+        function filterCoverLetters() {
+            loadCoverLettersFromDB();
         }
 
-        function deleteCoverLetter(idx) {
+        function openAddCoverLetterModal() {
+            currentEditType = 'cover-letter-add';
+            customFieldCounter = 0;
+
+            document.getElementById('modal-title').textContent = '자소서 문항 추가';
+            document.getElementById('modal-body').innerHTML = `
+                <div class="form-group">
+                    <label>회사명</label>
+                    <input type="text" id="edit-cl-company" placeholder="예: 삼성전자">
+                </div>
+                <div class="form-group">
+                    <label>직무</label>
+                    <input type="text" id="edit-cl-position" placeholder="예: 데이터 분석가">
+                </div>
+                <div class="form-group">
+                    <label>카테고리</label>
+                    <select id="edit-cl-category">
+                        <option value="지원동기">지원동기</option>
+                        <option value="성장과정">성장과정</option>
+                        <option value="성격/장단점">성격/장단점</option>
+                        <option value="갈등경험">갈등경험</option>
+                        <option value="협업경험">협업경험</option>
+                        <option value="문제해결">문제해결</option>
+                        <option value="실패경험">실패경험</option>
+                        <option value="목표/비전">목표/비전</option>
+                        <option value="직무역량">직무역량</option>
+                        <option value="기타">기타</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>문항 내용</label>
+                    <textarea id="edit-cl-question" placeholder="예: 지원동기를 구체적으로 작성해 주세요." style="min-height:80px;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>글자수 제한 (선택)</label>
+                    <input type="number" id="edit-cl-char-limit" placeholder="예: 500">
+                </div>
+                ${getCustomFieldsHTML({})}
+            `;
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function editCoverLetter(id, company, position, category, question, charLimit, extraFields = '{}') {
+            currentEditType = 'cover-letter-edit';
+            currentEditId = id;
+            customFieldCounter = 0;
+
+            let extra = {};
+            try { extra = JSON.parse(extraFields || '{}'); } catch(e) {}
+
+            document.getElementById('modal-title').textContent = '자소서 문항 수정';
+            document.getElementById('modal-body').innerHTML = `
+                <div class="form-group">
+                    <label>회사명</label>
+                    <input type="text" id="edit-cl-company" value="${company || ''}">
+                </div>
+                <div class="form-group">
+                    <label>직무</label>
+                    <input type="text" id="edit-cl-position" value="${position || ''}">
+                </div>
+                <div class="form-group">
+                    <label>카테고리</label>
+                    <select id="edit-cl-category">
+                        <option value="지원동기" ${category === '지원동기' ? 'selected' : ''}>지원동기</option>
+                        <option value="성장과정" ${category === '성장과정' ? 'selected' : ''}>성장과정</option>
+                        <option value="성격/장단점" ${category === '성격/장단점' ? 'selected' : ''}>성격/장단점</option>
+                        <option value="갈등경험" ${category === '갈등경험' ? 'selected' : ''}>갈등경험</option>
+                        <option value="협업경험" ${category === '협업경험' ? 'selected' : ''}>협업경험</option>
+                        <option value="문제해결" ${category === '문제해결' ? 'selected' : ''}>문제해결</option>
+                        <option value="실패경험" ${category === '실패경험' ? 'selected' : ''}>실패경험</option>
+                        <option value="목표/비전" ${category === '목표/비전' ? 'selected' : ''}>목표/비전</option>
+                        <option value="직무역량" ${category === '직무역량' ? 'selected' : ''}>직무역량</option>
+                        <option value="기타" ${category === '기타' ? 'selected' : ''}>기타</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>문항 내용</label>
+                    <textarea id="edit-cl-question" style="min-height:80px;">${question || ''}</textarea>
+                </div>
+                <div class="form-group">
+                    <label>글자수 제한 (선택)</label>
+                    <input type="number" id="edit-cl-char-limit" value="${charLimit || ''}">
+                </div>
+                ${getCustomFieldsHTML(extra)}
+            `;
+            document.getElementById('modal').classList.add('active');
+        }
+
+        function saveCoverLetterAnswer(id) {
+            const answer = document.getElementById(`answer-${id}`).value;
+            fetch(`/api/cover-letters/${id}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    answer: answer,
+                    company: '', position: '', category: '', question: '' // 필수 필드 (서버에서 무시됨)
+                })
+            }).then(r => r.json()).then(() => {
+                // 조용히 저장 (alert 없이)
+            });
+        }
+
+        function deleteCoverLetterFromDB(id) {
             if (confirm('정말 삭제하시겠습니까?')) {
-                coverLetters.splice(idx, 1);
-                localStorage.setItem('coverLetters', JSON.stringify(coverLetters));
-                loadCoverLetters();
+                fetch(`/api/cover-letters/${id}`, {method: 'DELETE'})
+                    .then(r => r.json())
+                    .then(data => {
+                        alert('삭제되었습니다!');
+                        loadCoverLettersFromDB();
+                    });
             }
         }
 
@@ -1674,7 +1846,6 @@
         // 페이지 로드 시 성적 데이터 표시
         window.onload = function() {
             loadGrades();
-            loadCoverLetters();
         };
     </script>
 </body>

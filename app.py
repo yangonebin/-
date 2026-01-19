@@ -360,6 +360,41 @@ def download_archive(archive_id):
     return jsonify({'error': '파일을 찾을 수 없습니다.'}), 404
 
 
+# ==================== 자소서 문항 API ====================
+@app.route('/api/cover-letters')
+def get_cover_letters():
+    """자소서 문항 목록 조회 API"""
+    category = request.args.get('category')
+    if category:
+        cover_letters = db.get_cover_letters_by_category(category)
+    else:
+        cover_letters = db.get_all_cover_letters()
+    return jsonify(cover_letters)
+
+
+@app.route('/api/cover-letters', methods=['POST'])
+def add_cover_letter():
+    """자소서 문항 추가 API"""
+    data = request.get_json()
+    cover_letter_id = db.add_cover_letter(data)
+    return jsonify({'success': True, 'id': cover_letter_id, 'message': '자소서 문항이 추가되었습니다.'})
+
+
+@app.route('/api/cover-letters/<int:cover_letter_id>', methods=['PUT'])
+def update_cover_letter(cover_letter_id):
+    """자소서 문항 수정 API"""
+    data = request.get_json()
+    db.update_cover_letter(cover_letter_id, data)
+    return jsonify({'success': True, 'message': '자소서 문항이 수정되었습니다.'})
+
+
+@app.route('/api/cover-letters/<int:cover_letter_id>', methods=['DELETE'])
+def delete_cover_letter(cover_letter_id):
+    """자소서 문항 삭제 API"""
+    db.delete_cover_letter(cover_letter_id)
+    return jsonify({'success': True, 'message': '자소서 문항이 삭제되었습니다.'})
+
+
 if __name__ == '__main__':
     # templates 폴더 생성
     if not os.path.exists('templates'):
