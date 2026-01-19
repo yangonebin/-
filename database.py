@@ -97,12 +97,40 @@ class ResumeDatabase:
                 start_date TEXT NOT NULL,
                 end_date TEXT NOT NULL,
                 description TEXT,
+                extra_fields TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
 
+        # 아카이브 테이블 (공식 문서 파일 관리)
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS archives (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                category TEXT NOT NULL,
+                file_path TEXT NOT NULL,
+                original_filename TEXT,
+                description TEXT,
+                upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+
+        # 기존 테이블에 extra_fields 컬럼 추가 (없으면)
+        self._add_column_if_not_exists(cursor, 'certifications', 'extra_fields', 'TEXT')
+        self._add_column_if_not_exists(cursor, 'awards', 'extra_fields', 'TEXT')
+        self._add_column_if_not_exists(cursor, 'activities', 'extra_fields', 'TEXT')
+        self._add_column_if_not_exists(cursor, 'projects', 'extra_fields', 'TEXT')
+        self._add_column_if_not_exists(cursor, 'career', 'extra_fields', 'TEXT')
+
         conn.commit()
         conn.close()
+
+    def _add_column_if_not_exists(self, cursor, table, column, col_type):
+        """테이블에 컬럼이 없으면 추가"""
+        cursor.execute(f"PRAGMA table_info({table})")
+        columns = [info[1] for info in cursor.fetchall()]
+        if column not in columns:
+            cursor.execute(f"ALTER TABLE {table} ADD COLUMN {column} {col_type}")
 
     # ==================== 성적 관리 ====================
     def add_grade(self, data):
@@ -441,3 +469,83 @@ class ResumeDatabase:
         cursor.execute('DELETE FROM career WHERE id=?', (career_id,))
         conn.commit()
         conn.close()
+
+    # ==================== 아카이브 관리 ====================
+    def add_archive(self, data):
+        """아카이브 파일 추가"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO archives (name, category, file_path, original_filename, description)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (data['name'], data['category'], data['file_path'],
+              data.get('original_filename', ''), data.get('description', '')))
+        conn.commit()
+        archive_id = cursor.lastrowid
+        conn.close()
+        return archive_id
+
+    def get_all_archives(self):
+        """모든 아카이브 조회"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM archives ORDER BY upload_date DESC')
+        rows = cursor.fetchall()
+        conn.close()
+
+        archives = []
+        for row in rows:
+            archives.append({
+                'id': row[0],
+                'name': row[1],
+                'category': row[2],
+                'file_path': row[3],
+                'original_filename': row[4],
+                'description': row[5],
+                'upload_date': row[6]
+            })
+        return archives
+
+    def get_archives_by_category(self, category):
+        """카테고리별 아카이브 조회"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM archives WHERE category=? ORDER BY upload_date DESC', (category,))
+        rows = cursor.fetchall()
+        conn.close()
+
+        archives = []
+        for row in rows:
+            archives.append({
+                'id': row[0],
+                'name': row[1],
+                'category': row[2],
+                'file_path': row[3],
+                'original_filename': row[4],
+                'description': row[5],
+                'upload_date': row[6]
+            })
+        return archives
+
+    def update_archive(self, archive_id, data):
+        """아카이브 수정"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE archives
+            SET name=?, category=?, description=?
+            WHERE id=?
+        ''', (data['name'], data['category'], data.get('description', ''), archive_id))
+        conn.commit()
+        conn.close()
+
+    def delete_archive(self, archive_id):
+        """아카이브 삭제"""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        cursor.execute('SELECT file_path FROM archives WHERE id=?', (archive_id,))
+        row = cursor.fetchone()
+        cursor.execute('DELETE FROM archives WHERE id=?', (archive_id,))
+        conn.commit()
+        conn.close()
+        return row[0] if row else None

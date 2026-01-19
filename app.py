@@ -274,6 +274,92 @@ def add_career():
     return jsonify({'success': True, 'id': career_id, 'message': '경력이 추가되었습니다.'})
 
 
+# ==================== 아카이브 API ====================
+UPLOAD_FOLDER = 'uploads/archives'
+ALLOWED_EXTENSIONS = {'pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'xls', 'xlsx', 'hwp'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/api/archives')
+def get_archives():
+    """아카이브 목록 조회 API"""
+    category = request.args.get('category')
+    if category:
+        archives = db.get_archives_by_category(category)
+    else:
+        archives = db.get_all_archives()
+    return jsonify(archives)
+
+
+@app.route('/api/archives', methods=['POST'])
+def add_archive():
+    """아카이브 파일 업로드 API"""
+    if 'file' not in request.files:
+        return jsonify({'error': '파일이 없습니다.'}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': '파일이 선택되지 않았습니다.'}), 400
+
+    if file and allowed_file(file.filename):
+        # 업로드 폴더 생성
+        if not os.path.exists(UPLOAD_FOLDER):
+            os.makedirs(UPLOAD_FOLDER)
+
+        # 파일명 안전하게 처리
+        from werkzeug.utils import secure_filename
+        import uuid
+        original_filename = file.filename
+        ext = original_filename.rsplit('.', 1)[1].lower()
+        new_filename = f"{uuid.uuid4().hex}.{ext}"
+        file_path = os.path.join(UPLOAD_FOLDER, new_filename)
+        file.save(file_path)
+
+        # DB에 저장
+        data = {
+            'name': request.form.get('name', original_filename),
+            'category': request.form.get('category', '기타'),
+            'file_path': file_path,
+            'original_filename': original_filename,
+            'description': request.form.get('description', '')
+        }
+        archive_id = db.add_archive(data)
+        return jsonify({'success': True, 'id': archive_id, 'message': '파일이 업로드되었습니다.'})
+
+    return jsonify({'error': '허용되지 않는 파일 형식입니다.'}), 400
+
+
+@app.route('/api/archives/<int:archive_id>', methods=['PUT'])
+def update_archive(archive_id):
+    """아카이브 수정 API"""
+    data = request.get_json()
+    db.update_archive(archive_id, data)
+    return jsonify({'success': True, 'message': '아카이브가 수정되었습니다.'})
+
+
+@app.route('/api/archives/<int:archive_id>', methods=['DELETE'])
+def delete_archive(archive_id):
+    """아카이브 삭제 API"""
+    file_path = db.delete_archive(archive_id)
+    # 파일도 삭제
+    if file_path and os.path.exists(file_path):
+        os.remove(file_path)
+    return jsonify({'success': True, 'message': '아카이브가 삭제되었습니다.'})
+
+
+@app.route('/api/archives/<int:archive_id>/download')
+def download_archive(archive_id):
+    """아카이브 파일 다운로드 API"""
+    archives = db.get_all_archives()
+    archive = next((a for a in archives if a['id'] == archive_id), None)
+    if archive and os.path.exists(archive['file_path']):
+        return send_file(archive['file_path'],
+                        as_attachment=True,
+                        download_name=archive['original_filename'])
+    return jsonify({'error': '파일을 찾을 수 없습니다.'}), 404
+
+
 if __name__ == '__main__':
     # templates 폴더 생성
     if not os.path.exists('templates'):
