@@ -1843,9 +1843,49 @@
             return Object.keys(fields).length > 0 ? JSON.stringify(fields) : null;
         }
 
+        // localStorage → DB 마이그레이션 (자소서 문항)
+        async function migrateCoverLetters() {
+            const localData = localStorage.getItem('coverLetters');
+            if (!localData) return;
+
+            try {
+                const coverLetters = JSON.parse(localData);
+                if (coverLetters.length === 0) return;
+
+                console.log(`마이그레이션 시작: ${coverLetters.length}개 문항`);
+
+                for (const item of coverLetters) {
+                    const data = {
+                        company: item.company || '',
+                        position: item.position || '',
+                        category: '기타',  // 기존 데이터에는 카테고리가 없으므로 기본값
+                        question: item.question || '',
+                        answer: item.answer || '',
+                        char_limit: null
+                    };
+
+                    await fetch('/api/cover-letters', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(data)
+                    });
+                }
+
+                // 마이그레이션 완료 후 localStorage 데이터 백업 후 삭제
+                localStorage.setItem('coverLetters_backup', localData);
+                localStorage.removeItem('coverLetters');
+
+                alert(`✅ ${coverLetters.length}개의 자소서 문항이 DB로 이전되었습니다!\n(기존 데이터는 coverLetters_backup에 백업됨)`);
+                console.log('마이그레이션 완료');
+            } catch (e) {
+                console.error('마이그레이션 실패:', e);
+            }
+        }
+
         // 페이지 로드 시 성적 데이터 표시
         window.onload = function() {
             loadGrades();
+            migrateCoverLetters();  // 마이그레이션 실행
         };
     </script>
 </body>
